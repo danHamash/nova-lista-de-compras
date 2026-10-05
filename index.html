@@ -145,45 +145,47 @@
         </div>
     </div>
 
-    <!-- MODAL DE COMPARAÇÃO -->
-    <div id="modalComparacao" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-        <div class="bg-white w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
-            <div class="bg-purple-600 text-white p-5 flex justify-between items-center shadow-md">
+    <!-- MODAL DE COMPARAÇÃO RESPONSIVO -->
+    <div id="modalComparacao" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-md p-2 sm:p-4">
+        <div class="bg-white w-full max-w-3xl max-h-[95vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
+            <div class="bg-purple-600 text-white p-4 sm:p-5 flex justify-between items-center shadow-md">
                 <div>
-                    <h2 class="text-xl font-bold flex items-center gap-2">
-                        <i class="ph ph-scales text-2xl"></i> Comparação de Preços
+                    <h2 class="text-lg sm:text-xl font-bold flex items-center gap-2">
+                        <i class="ph ph-scales text-xl sm:text-2xl"></i> Comparação de Preços
                     </h2>
-                    <p id="subtituloComparacao" class="text-purple-200 text-sm mt-1"></p>
+                    <p id="subtituloComparacao" class="text-purple-200 text-xs sm:text-sm mt-1"></p>
                 </div>
                 <button onclick="fecharComparacao()" class="text-white hover:text-red-300 transition-colors bg-purple-700 hover:bg-purple-800 p-2 rounded-full">
-                    <i class="ph ph-x text-xl font-bold"></i>
+                    <i class="ph ph-x text-lg sm:text-xl font-bold"></i>
                 </button>
             </div>
 
-            <div class="bg-purple-50 p-4 border-b border-purple-100 flex flex-col sm:flex-row items-center gap-3">
-                <span class="text-sm font-semibold text-purple-800 whitespace-nowrap">
+            <div class="bg-purple-50 p-3 sm:p-4 border-b border-purple-100 flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
+                <span class="text-xs sm:text-sm font-semibold text-purple-800 whitespace-nowrap">
                     <i class="ph ph-arrows-left-right"></i> Cruzar dados com:
                 </span>
-                <select id="seletorAlvoComparacao" onchange="atualizarTabelaComparacao()" class="w-full sm:flex-1 p-2 bg-white border border-purple-200 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-purple-400 outline-none cursor-pointer shadow-sm"></select>
+                <select id="seletorAlvoComparacao" onchange="atualizarTabelaComparacao()" class="w-full sm:flex-1 p-2 bg-white border border-purple-200 rounded-lg text-gray-700 text-xs sm:text-sm focus:ring-2 focus:ring-purple-400 outline-none cursor-pointer shadow-sm"></select>
             </div>
             
-            <div class="p-6 overflow-y-auto flex-1 bg-gray-50">
+            <div class="p-2 sm:p-6 overflow-y-auto flex-1 bg-gray-50">
                 <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                    <table class="w-full text-left border-collapse min-w-[500px]">
-                        <thead>
-                            <tr class="bg-gray-100 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
-                                <th class="py-3 px-4 font-bold">Produto em Comum</th>
-                                <th class="py-3 px-4 font-bold text-center">Lista Base</th>
-                                <th id="headerPrecoAlvo" class="py-3 px-4 font-bold text-center text-purple-700">Lista Selecionada</th>
-                                <th class="py-3 px-4 font-bold text-right">Variação</th>
-                            </tr>
-                        </thead>
-                        <tbody id="conteudoComparacao" class="divide-y divide-gray-100"></tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[300px] lg:min-w-[500px]">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-500 text-[10px] sm:text-xs uppercase tracking-wider border-b border-gray-200">
+                                    <th class="py-2 px-2 lg:py-3 lg:px-4 font-bold">Produto</th>
+                                    <th class="py-2 px-1 lg:py-3 lg:px-4 font-bold text-center">Base</th>
+                                    <th id="headerPrecoAlvo" class="py-2 px-1 lg:py-3 lg:px-4 font-bold text-center text-purple-700">Atual</th>
+                                    <th class="py-2 px-2 lg:py-3 lg:px-4 font-bold text-right">Variação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="conteudoComparacao" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
                 </div>
-                <div id="mensagemSemComparacao" class="hidden text-center py-8 text-gray-500">
-                    <i class="ph ph-warning-circle text-4xl mb-2 text-gray-300"></i>
-                    <p>Nenhum produto coincidiu (com preços preenchidos) entre essas duas listas.</p>
+                <div id="mensagemSemComparacao" class="hidden text-center py-8 text-gray-500 px-4">
+                    <i class="ph ph-warning-circle text-3xl sm:text-4xl mb-2 text-gray-300"></i>
+                    <p class="text-sm">Nenhum produto coincidiu (com preços preenchidos) entre essas duas listas.</p>
                 </div>
             </div>
         </div>
@@ -444,7 +446,7 @@
             });
         };
 
-        // --- COMPARAÇÃO ---
+        // --- COMPARAÇÃO CRONOLÓGICA ---
         let idListaBaseComparacao = null;
 
         window.prepararComparacao = (id) => {
@@ -452,10 +454,10 @@
             const compraBase = historicoDB.find(c => c.id === id);
             if (!compraBase) return;
 
-            subtituloComparacao.innerHTML = `Lista Base Fixa: <strong>${formatarData(compraBase.data)}</strong>`;
+            subtituloComparacao.innerHTML = `Referência selecionada: <strong>${formatarData(compraBase.data)}</strong>`;
             seletorAlvoComparacao.innerHTML = '<option value="atual">Minha Lista Atual (Carrinho)</option>';
             historicoDB.forEach(hist => {
-                if(hist.id !== id) seletorAlvoComparacao.innerHTML += `<option value="${hist.id}">Lista do dia ${formatarData(hist.data)}</option>`;
+                if(hist.id !== id) seletorAlvoComparacao.innerHTML += `<option value="${hist.id}">Lista de ${formatarData(hist.data)}</option>`;
             });
 
             window.atualizarTabelaComparacao();
@@ -468,17 +470,24 @@
 
             const idAlvo = seletorAlvoComparacao.value;
             let listaAlvo = [];
+            let dataAlvoMs = Date.now(); // se for 'atual', a data é o momento presente
 
             if (idAlvo === 'atual') {
                 listaAlvo = compras;
-                headerPrecoAlvo.innerHTML = `Lista Atual <span class="block text-[10px] text-purple-300 font-normal">Preço agora</span>`;
+                headerPrecoAlvo.innerHTML = `Lista Atual <span class="block text-[8px] sm:text-[10px] text-purple-300 font-normal">Preço agora</span>`;
             } else {
                 const compraAlvo = historicoDB.find(c => c.id == idAlvo);
                 if (compraAlvo) {
                     listaAlvo = compraAlvo.itens;
-                    headerPrecoAlvo.innerHTML = `Lista ${formatarData(compraAlvo.data)} <span class="block text-[10px] text-purple-300 font-normal">Preço da época</span>`;
+                    dataAlvoMs = new Date(compraAlvo.data).getTime();
+                    headerPrecoAlvo.innerHTML = `Lista Sel. <span class="block text-[8px] sm:text-[10px] text-purple-300 font-normal">${formatarData(compraAlvo.data).substring(0,5)}</span>`;
                 }
             }
+
+            const dataBaseMs = new Date(compraBase.data).getTime();
+            
+            // Determina a ordem no tempo de forma 100% cronológica
+            const baseIsMaisRecente = dataBaseMs > dataAlvoMs;
 
             conteudoComparacao.innerHTML = '';
             let itensComparados = 0;
@@ -487,7 +496,14 @@
                 const itemBase = compraBase.itens.find(i => i.produto.toLowerCase().trim() === itemAlvo.produto.toLowerCase().trim());
                 if (itemBase && itemBase.valor > 0 && itemAlvo.valor > 0) {
                     itensComparados++;
-                    const diferenca = itemAlvo.valor - itemBase.valor;
+                    
+                    // Cálculo cronológico independente da UI: O que aconteceu com o preço ao longo do tempo?
+                    let diferenca = 0;
+                    if (baseIsMaisRecente) {
+                        diferenca = itemBase.valor - itemAlvo.valor; // Base é a mais nova, Alvo é a antiga
+                    } else {
+                        diferenca = itemAlvo.valor - itemBase.valor; // Alvo é a mais nova, Base é a antiga
+                    }
                     
                     let corTexto = "text-gray-500";
                     let icone = `<i class="ph ph-equals"></i> Manteve`;
@@ -496,18 +512,18 @@
                     if (diferenca > 0) {
                         corTexto = "text-red-500"; icone = `<i class="ph ph-trend-up"></i> Aumentou`; valorDiferenca = `+ ${formatarMoeda(diferenca)}`;
                     } else if (diferenca < 0) {
-                        corTexto = "text-green-500"; icone = `<i class="ph ph-trend-down"></i> Baixou`; valorDiferenca = `- ${formatarMoeda(Math.abs(diferenca))}`;
+                        corTexto = "text-green-500"; icone = `<i class="ph ph-trend-down"></i> Reduziu`; valorDiferenca = `- ${formatarMoeda(Math.abs(diferenca))}`;
                     }
 
                     const tr = document.createElement('tr');
-                    tr.className = "hover:bg-gray-50 border-b border-gray-100";
+                    tr.className = "hover:bg-gray-50 border-b border-gray-100 text-xs sm:text-sm";
                     tr.innerHTML = `
-                        <td class="py-3 px-4 text-gray-800 font-medium">${itemAlvo.produto}</td>
-                        <td class="py-3 px-4 text-center text-gray-500">${formatarMoeda(itemBase.valor)}</td>
-                        <td class="py-3 px-4 text-center font-semibold text-purple-700 bg-purple-50/50">${formatarMoeda(itemAlvo.valor)}</td>
-                        <td class="py-3 px-4 text-right font-bold ${corTexto} flex flex-col items-end">
+                        <td class="py-2 px-2 lg:py-3 lg:px-4 text-gray-800 font-medium break-words max-w-[100px] sm:max-w-none">${itemAlvo.produto}</td>
+                        <td class="py-2 px-1 lg:py-3 lg:px-4 text-center text-gray-500">${formatarMoeda(itemBase.valor)}</td>
+                        <td class="py-2 px-1 lg:py-3 lg:px-4 text-center font-semibold text-purple-700 bg-purple-50/50">${formatarMoeda(itemAlvo.valor)}</td>
+                        <td class="py-2 px-2 lg:py-3 lg:px-4 text-right font-bold ${corTexto} flex flex-col items-end">
                             <span>${valorDiferenca}</span>
-                            <span class="text-[10px] uppercase font-bold tracking-wider flex items-center gap-1 opacity-70">${icone}</span>
+                            <span class="text-[8px] sm:text-[10px] uppercase font-bold tracking-wider flex items-center gap-1 opacity-70">${icone}</span>
                         </td>
                     `;
                     conteudoComparacao.appendChild(tr);
@@ -515,9 +531,9 @@
             });
 
             if (itensComparados === 0) {
-                mensagemSemComparacao.classList.remove('hidden'); conteudoComparacao.parentElement.classList.add('hidden');
+                mensagemSemComparacao.classList.remove('hidden'); conteudoComparacao.closest('table').parentElement.classList.add('hidden');
             } else {
-                mensagemSemComparacao.classList.add('hidden'); conteudoComparacao.parentElement.classList.remove('hidden');
+                mensagemSemComparacao.classList.add('hidden'); conteudoComparacao.closest('table').parentElement.classList.remove('hidden');
             }
         };
 
@@ -594,7 +610,6 @@
             
             alert('Seu aparelho não suporta o menu de compartilhamento nativo. O arquivo da planilha será baixado e você poderá enviá-lo pelo WhatsApp Web.');
             
-            // Usando URI de dados para download infalível (Chrome/PC)
             const encodedUri = "data:text/csv;charset=utf-8," + encodeURIComponent("\uFEFF" + csvContent);
             const link = document.createElement('a');
             link.href = encodedUri;
@@ -617,7 +632,6 @@
                     csvContent += `${item.unidade},${prod},${cat},${val}\n`;
                 });
                 
-                // Em vez de Blob URL, converte para Link de Dados Codificado (Funciona sempre no Chrome mobile/desktop)
                 const encodedUri = "data:text/csv;charset=utf-8," + encodeURIComponent("\uFEFF" + csvContent);
                 const link = document.createElement('a');
                 link.setAttribute("href", encodedUri);
