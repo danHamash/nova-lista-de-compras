@@ -31,22 +31,29 @@
 
         <div class="p-2 sm:p-8 flex-1">
             
-            <!-- Seção de Importação / Exportação -->
+            <!-- Seção de Importação / Exportação / WhatsApp -->
             <div class="mb-8 p-5 bg-blue-50/80 border border-blue-200 rounded-xl shadow-sm">
                 <div class="flex flex-col md:flex-row items-center gap-4 justify-between">
                     <div class="flex-1 text-center md:text-left">
                         <h2 class="text-lg font-bold text-blue-900 flex items-center justify-center md:justify-start gap-2 mb-1">
-                            <i class="ph ph-files text-2xl"></i> Lista em Planilha (CSV)
+                            <i class="ph ph-export text-2xl"></i> Dados & Compartilhamento
                         </h2>
-                        <p class="text-xs text-gray-600 mt-1 hidden md:block">Colunas: <code class="bg-white px-1 py-0.5 rounded border border-gray-300 font-bold">unidade, produto, categoria, valor</code></p>
+                        <p class="text-xs text-gray-600 mt-1 hidden md:block">Colunas CSV: <code class="bg-white px-1 py-0.5 rounded border border-gray-300 font-bold">unidade, produto, categoria, valor</code></p>
                     </div>
                     <div class="flex flex-col sm:flex-row w-full md:w-auto gap-3">
                         <label class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition-colors flex items-center justify-center gap-2 font-medium">
-                            <i class="ph ph-upload-simple text-xl"></i> Importar
+                            <i class="ph ph-upload-simple text-xl"></i> Importar CSV
                             <input type="file" id="csvFileInput" accept=".csv" class="hidden" />
                         </label>
+                        <!-- NOVO BOTÃO WHATSAPP (TEXTO)
+                        <button id="btnWhatsApp" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow transition-colors flex items-center justify-center gap-2 font-medium">
+                            <i class="ph ph-whatsapp-logo text-xl"></i> Wpp (Texto)
+                        </button> 
+                        -->
+                        
+                        <!-- BOTÃO EXPORTAR (FIXADO PARA IPHONE/COMPARTILHAR) -->
                         <button id="btnExportar" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg shadow transition-colors flex items-center justify-center gap-2 font-medium">
-                            <i class="ph ph-download-simple text-xl"></i> Exportar
+                            <i class="ph ph-file-csv text-xl"></i> Exportar (CSV)
                         </button>
                     </div>
                 </div>
@@ -194,6 +201,7 @@
         const btnLimpar = document.getElementById('limparLista');
         const csvInput = document.getElementById('csvFileInput');
         const btnExportar = document.getElementById('btnExportar');
+        const btnWhatsApp = document.getElementById('btnWhatsApp');
         const btnFinalizar = document.getElementById('btnFinalizar');
         
         const modalHistorico = document.getElementById('modalHistorico');
@@ -207,7 +215,6 @@
 
         const gerarId = () => Date.now().toString(36) + Math.random().toString(36).substring(2);
 
-        // Garantindo que todos os itens tenham um ID no formato STRING para evitar bugs de comparação
         let compras = JSON.parse(localStorage.getItem('minhaListaComprasDB')) || [];
         compras = compras.map(item => ({...item, id: item.id ? String(item.id) : gerarId(), categoria: item.categoria || 'Geral'}));
         
@@ -234,12 +241,9 @@
             }, {});
         };
 
-        // --- SISTEMA DE COMPRAS ATUALIZADO ---
         window.atualizarPreco = (id, novoValorTexto) => {
-            // Buscando pelo ID de forma segura (ambos convertidos para String)
             const index = compras.findIndex(c => String(c.id) === String(id));
             if(index > -1) {
-                // Trata a vírgula para aceitar teclados de celular sem quebrar
                 const txt = novoValorTexto ? String(novoValorTexto) : "";
                 const valorFormatado = txt.replace(',', '.');
                 compras[index].valor = parseFloat(valorFormatado) || 0;
@@ -287,7 +291,6 @@
                         <td class="py-1 px-1 lg:py-3 lg:px-4">
                             <div class="relative w-full max-w-[120px]">
                                 <span class="absolute inset-y-0 left-0 pl-1 lg:pl-2 flex items-center text-gray-500 font-medium">R$</span>
-                                <!-- AQUI: inputmode="decimal" tipo text garante que o teclado mobile de vírgulas funcione perfeitamente -->
                                 <input type="text" inputmode="decimal" value="${item.valor > 0 ? item.valor : ''}" onchange="atualizarPreco('${item.id}', this.value)"
                                     class="w-full pl-6 lg:pl-8 pr-1 lg:pr-2 py-1 lg:py-1.5 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none transition-colors text-gray-700 font-medium ${classeInput}" placeholder="0,00">
                             </div>
@@ -524,7 +527,7 @@
 
         window.fecharComparacao = () => modalComparacao.classList.add('hidden');
 
-        // --- IMPORTAR / EXPORTAR ---
+        // --- IMPORTAR (CSV) ---
         csvInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -563,17 +566,73 @@
             if (importados > 0) { atualizarApp(); alert(`${importados} itens importados com sucesso!`); }
         };
 
-        btnExportar.addEventListener('click', () => {
+        // --- WHATSAPP TEXTO (NOVO) ---
+        btnWhatsApp.addEventListener('click', () => {
             if (compras.length === 0) { alert('A lista está vazia!'); return; }
+            
+            let textoWpp = "🛒 *MINHA LISTA DE COMPRAS* 🛒\n\n";
+            const grupos = agruparPorCategoria(compras);
+            
+            Object.keys(grupos).sort().forEach(cat => {
+                textoWpp += `*--- ${cat.toUpperCase()} ---*\n`;
+                grupos[cat].forEach(item => {
+                    textoWpp += `• ${item.unidade}x ${item.produto}`;
+                    if(item.valor > 0) {
+                        textoWpp += ` (R$ ${item.valor.toFixed(2).replace('.', ',')})`;
+                    }
+                    textoWpp += `\n`;
+                });
+                textoWpp += `\n`;
+            });
+            
+            const total = compras.reduce((acc, item) => acc + (item.unidade * (item.valor || 0)), 0);
+            if(total > 0) {
+                textoWpp += `💰 *Total Previsto: R$ ${total.toFixed(2).replace('.', ',')}*\n`;
+            }
+            
+            const url = `https://wa.me/?text=${encodeURIComponent(textoWpp)}`;
+            window.open(url, '_blank');
+        });
+
+        // --- EXPORTAR ARQUIVO (CORRIGIDO PARA IPHONE/SAFARI) ---
+        btnExportar.addEventListener('click', async () => {
+            if (compras.length === 0) { alert('A lista está vazia!'); return; }
+            
             let csvContent = "unidade,produto,categoria,valor\n";
             compras.forEach(item => {
                 csvContent += `${item.unidade},${item.produto.replace(/,/g, '')},${item.categoria || 'Geral'},${(item.valor || 0).toFixed(2)}\n`;
             });
+            
             const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const fileName = 'lista_compras_categorizada.csv';
+            
+            // Tentativa 1: Usar a Web Share API nativa do iOS (Abre a janela de compartilhar Wpp/Arquivos)
+            const file = new File([blob], fileName, { type: 'text/csv' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        title: 'Minha Lista de Compras',
+                        text: 'Segue a planilha da lista de compras:',
+                        files: [file]
+                    });
+                    return; // Se funcionou, para por aqui
+                } catch (error) {
+                    console.log('Compartilhamento cancelado pelo usuário.', error);
+                }
+            }
+
+            // Tentativa 2 (Fallback): Forçar o download da maneira que o Safari exige
+            const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'lista_compras_categorizada.csv';
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link); // <-- Este appendChild é obrigatório no iPhone!
             link.click();
+            
+            setTimeout(() => {
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            }, 100);
         });
 
         renderizarLista();
