@@ -36,8 +36,9 @@
                 <div class="flex flex-col md:flex-row items-center gap-4 justify-between">
                     <div class="flex-1 text-center md:text-left">
                         <h2 class="text-lg font-bold text-blue-900 flex items-center justify-center md:justify-start gap-2 mb-1">
-                            <i class="ph ph-files text-2xl"></i>Lista em Planilha (CSV)
+                            <i class="ph ph-files text-2xl"></i> Lista em Planilha (CSV)
                         </h2>
+                        <p class="text-xs text-gray-600 mt-1 hidden md:block">Colunas: <code class="bg-white px-1 py-0.5 rounded border border-gray-300 font-bold">unidade, produto, categoria, valor</code></p>
                     </div>
                     <div class="flex flex-col sm:flex-row w-full md:w-auto gap-3">
                         <label class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition-colors flex items-center justify-center gap-2 font-medium">
@@ -52,18 +53,31 @@
             </div>
 
             <!-- Formulário de Inserção -->
-            <form id="itemForm" class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-8 bg-gray-50 p-5 rounded-xl border border-gray-200 shadow-sm">
-                <div class="sm:col-span-3">
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Quantidade</label>
-                    <input type="number" id="unidade" placeholder="Ex: 2" required min="1" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+            <form id="itemForm" class="grid grid-cols-1 sm:grid-cols-12 gap-3 mb-8 bg-gray-50 p-5 rounded-xl border border-gray-200 shadow-sm">
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Qtd</label>
+                    <input type="number" id="unidade" placeholder="Ex: 2" required min="1" class="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
                 </div>
-                <div class="sm:col-span-8">
+                <div class="sm:col-span-5">
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">O que vamos comprar?</label>
-                    <input type="text" id="produto" placeholder="Nome do produto..." required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                    <input type="text" id="produto" placeholder="Nome do produto..." required class="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                </div>
+                <div class="sm:col-span-4">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Seção</label>
+                    <select id="categoria" required class="w-full p-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white cursor-pointer">
+                        <option value="Geral">🛒 Geral</option>
+                        <option value="Alimentos">🍝 Alimentos (Mercearia)</option>
+                        <option value="Limpeza">🧹 Limpeza</option>
+                        <option value="Higiene">🧴 Higiene Pessoal</option>
+                        <option value="Carnes">🥩 Carnes e Frios</option>
+                        <option value="Hortifruti">🍎 Hortifruti</option>
+                        <option value="Bebidas">🥤 Bebidas</option>
+                        <option value="Pet">🐾 Petshop</option>
+                    </select>
                 </div>
                 <div class="sm:col-span-1 flex items-end">
-                    <button type="submit" title="Adicionar à Lista" class="w-full h-[50px] bg-green-500 hover:bg-green-600 text-white rounded-lg flex items-center justify-center shadow transition-transform transform hover:scale-105">
-                        <i class="ph ph-plus text-2xl"></i>
+                    <button type="submit" title="Adicionar à Lista" class="w-full h-[46px] bg-green-500 hover:bg-green-600 text-white rounded-lg flex items-center justify-center shadow transition-transform transform hover:scale-105">
+                        <i class="ph ph-plus-bold text-xl"></i>
                     </button>
                 </div>
             </form>
@@ -72,16 +86,16 @@
             <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-6">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse min-w-[300px] lg:min-w-[600px]">
-                        <thead class="">
-                            <tr class="bg-gray-100 text-gray-600 uppercase text-xs tracking-wider border-b border-gray-200 ">
-                                <th class=" py-1 px-1 lg:py-3 lg:px-4 font-bold ">Qtd</th>
-                                <th class=" py-1 px-1  lg:py-3 lg:px-4 font-bold ">Produto</th>
-                                <th class="py-1 px-1 lg:py-3 lg:px-4 font-bold ">Preço</th>
-                                <th class=" py-1 px-1 lg:py-3 lg:px-4 font-bold ">Subtotal</th>
-                                <th class=" py-1 px-1 lg:py-3 lg:px-4 font-bold text-center">Ação</th>
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-600 uppercase text-xs tracking-wider border-b border-gray-200">
+                                <th class="py-1 px-1 lg:py-3 lg:px-4 font-bold w-12 lg:w-16">Qtd</th>
+                                <th class="py-1 px-1 lg:py-3 lg:px-4 font-bold">Produto</th>
+                                <th class="py-1 px-1 lg:py-3 lg:px-4 font-bold w-28 lg:w-36">Preço</th>
+                                <th class="py-1 px-1 lg:py-3 lg:px-4 font-bold w-20 lg:w-24 hidden md:table-cell">Subtotal</th>
+                                <th class="py-1 px-1 lg:py-3 lg:px-4 font-bold text-center w-12 lg:w-16">Ação</th>
                             </tr>
                         </thead>
-                        <tbody id="listaCompras" class="divide-y divide-gray-100  text-sm md:text-base">
+                        <tbody id="listaCompras" class="divide-y divide-gray-100 text-sm md:text-base">
                             <!-- Itens dinâmicos -->
                         </tbody>
                     </table>
@@ -111,7 +125,6 @@
     <!-- MODAL DO HISTÓRICO -->
     <div id="modalHistorico" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
         <div class="bg-white w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
-            <!-- Cabeçalho -->
             <div class="bg-gray-100 border-b border-gray-200 p-6 flex justify-between items-center">
                 <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
                     <i class="ph ph-clock-counter-clockwise text-blue-600"></i> Histórico de Compras
@@ -120,9 +133,7 @@
                     <i class="ph ph-x text-xl font-bold"></i>
                 </button>
             </div>
-            <!-- Lista -->
             <div id="conteudoHistorico" class="p-6 overflow-y-auto flex-1 bg-gray-50 space-y-4"></div>
-            <!-- Rodapé -->
             <div class="bg-gray-100 border-t border-gray-200 p-4 text-center">
                 <button onclick="limparHistoricoTudo()" class="text-red-500 hover:text-red-700 font-semibold text-sm">
                     Apagar todo o histórico
@@ -131,7 +142,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE COMPARAÇÃO (NOVO) -->
+    <!-- MODAL DE COMPARAÇÃO -->
     <div id="modalComparacao" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
         <div class="bg-white w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
             <div class="bg-purple-600 text-white p-5 flex justify-between items-center shadow-md">
@@ -145,6 +156,13 @@
                     <i class="ph ph-x text-xl font-bold"></i>
                 </button>
             </div>
+
+            <div class="bg-purple-50 p-4 border-b border-purple-100 flex flex-col sm:flex-row items-center gap-3">
+                <span class="text-sm font-semibold text-purple-800 whitespace-nowrap">
+                    <i class="ph ph-arrows-left-right"></i> Cruzar dados com:
+                </span>
+                <select id="seletorAlvoComparacao" onchange="atualizarTabelaComparacao()" class="w-full sm:flex-1 p-2 bg-white border border-purple-200 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-purple-400 outline-none cursor-pointer shadow-sm"></select>
+            </div>
             
             <div class="p-6 overflow-y-auto flex-1 bg-gray-50">
                 <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
@@ -152,19 +170,17 @@
                         <thead>
                             <tr class="bg-gray-100 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
                                 <th class="py-3 px-4 font-bold">Produto em Comum</th>
-                                <th class="py-3 px-4 font-bold text-center">Preço Antigo</th>
-                                <th class="py-3 px-4 font-bold text-center">Preço Atual</th>
+                                <th class="py-3 px-4 font-bold text-center">Lista Base</th>
+                                <th id="headerPrecoAlvo" class="py-3 px-4 font-bold text-center text-purple-700">Lista Selecionada</th>
                                 <th class="py-3 px-4 font-bold text-right">Variação</th>
                             </tr>
                         </thead>
-                        <tbody id="conteudoComparacao" class="divide-y divide-gray-100">
-                            <!-- Comparação dinâmica aqui -->
-                        </tbody>
+                        <tbody id="conteudoComparacao" class="divide-y divide-gray-100"></tbody>
                     </table>
                 </div>
                 <div id="mensagemSemComparacao" class="hidden text-center py-8 text-gray-500">
                     <i class="ph ph-warning-circle text-4xl mb-2 text-gray-300"></i>
-                    <p>Nenhum produto com preço preenchido coincide entre a lista antiga e a atual.</p>
+                    <p>Nenhum produto coincidiu (com preços preenchidos) entre essas duas listas.</p>
                 </div>
             </div>
         </div>
@@ -182,13 +198,19 @@
         
         const modalHistorico = document.getElementById('modalHistorico');
         const conteudoHistorico = document.getElementById('conteudoHistorico');
-        
         const modalComparacao = document.getElementById('modalComparacao');
         const conteudoComparacao = document.getElementById('conteudoComparacao');
         const subtituloComparacao = document.getElementById('subtituloComparacao');
         const mensagemSemComparacao = document.getElementById('mensagemSemComparacao');
+        const seletorAlvoComparacao = document.getElementById('seletorAlvoComparacao');
+        const headerPrecoAlvo = document.getElementById('headerPrecoAlvo');
 
+        const gerarId = () => Date.now().toString(36) + Math.random().toString(36).substring(2);
+
+        // Garantindo que todos os itens tenham um ID no formato STRING para evitar bugs de comparação
         let compras = JSON.parse(localStorage.getItem('minhaListaComprasDB')) || [];
+        compras = compras.map(item => ({...item, id: item.id ? String(item.id) : gerarId(), categoria: item.categoria || 'Geral'}));
+        
         let historicoDB = JSON.parse(localStorage.getItem('meuHistoricoDB')) || [];
 
         const atualizarApp = () => {
@@ -200,20 +222,37 @@
             localStorage.setItem('meuHistoricoDB', JSON.stringify(historicoDB));
         };
 
-        const formatarMoeda = (valor) => {
-            return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const formatarMoeda = (valor) => Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const formatarData = (isoString) => new Date(isoString).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+        const agruparPorCategoria = (lista) => {
+            return lista.reduce((grupos, item) => {
+                const cat = item.categoria || 'Geral';
+                if (!grupos[cat]) grupos[cat] = [];
+                grupos[cat].push(item);
+                return grupos;
+            }, {});
         };
 
-        const formatarData = (isoString) => {
-            const data = new Date(isoString);
-            return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        // --- SISTEMA DE COMPRAS ATUALIZADO ---
+        window.atualizarPreco = (id, novoValorTexto) => {
+            // Buscando pelo ID de forma segura (ambos convertidos para String)
+            const index = compras.findIndex(c => String(c.id) === String(id));
+            if(index > -1) {
+                // Trata a vírgula para aceitar teclados de celular sem quebrar
+                const txt = novoValorTexto ? String(novoValorTexto) : "";
+                const valorFormatado = txt.replace(',', '.');
+                compras[index].valor = parseFloat(valorFormatado) || 0;
+                atualizarApp();
+            }
         };
 
-        // --- SISTEMA DE COMPRAS ATUAL ---
-        window.atualizarPreco = (index, novoValorTexto) => {
-            const valorFormatado = novoValorTexto.replace(',', '.');
-            compras[index].valor = parseFloat(valorFormatado) || 0;
-            atualizarApp();
+        window.removerItem = (id) => {
+            const index = compras.findIndex(c => String(c.id) === String(id));
+            if(index > -1) {
+                compras.splice(index, 1);
+                atualizarApp();
+            }
         };
 
         const renderizarLista = () => {
@@ -226,33 +265,44 @@
                 return;
             }
 
-            compras.forEach((item, index) => {
-                const subtotal = item.unidade * (item.valor || 0);
-                totalGeral += subtotal;
+            const grupos = agruparPorCategoria(compras);
+            
+            Object.keys(grupos).sort().forEach(categoria => {
+                const trHeader = document.createElement('tr');
+                trHeader.className = "bg-blue-50/80 border-b border-blue-100";
+                trHeader.innerHTML = `<td colspan="5" class="py-2 px-2 lg:px-4 font-bold text-blue-800 uppercase tracking-wider text-xs"><i class="ph ph-tag text-sm align-middle mr-1"></i> ${categoria}</td>`;
+                listaEl.appendChild(trHeader);
 
-                const classeInput = item.valor > 0 ? 'border-gray-300 bg-white' : 'border-amber-300 bg-amber-50 placeholder-amber-400';
+                grupos[categoria].forEach((item) => {
+                    const subtotal = item.unidade * (item.valor || 0);
+                    totalGeral += subtotal;
 
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-blue-50/50 transition-colors group ";
-                tr.innerHTML = `
-                    <td class="py-1 px-1 lg:py-3 lg:px-4 text-gray-700 font-semibold">${item.unidade}x</td>
-                    <td class="py-1 px-1 lg:py-3 lg:px-4 text-gray-900 font-medium">${item.produto}</td>
-                    <td class="py-1 px-1 lg:py-3 lg:px-4">
-                        <div class="relative w-full max-w-[120px]">
-                            <span class="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-500 font-medium">R$</span>
-                            <input type="number" step="0.01" min="0" value="${item.valor > 0 ? item.valor : ''}" onchange="atualizarPreco(${index}, this.value)"
-                                class="w-full pl-8 pr-2 py-1.5 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none transition-colors text-gray-700 font-medium ${classeInput}" placeholder="0,00">
-                        </div>
-                    </td>
-                    <td class="py-1 px-1 lg:py-3 lg:px-4 text-blue-700 font-bold">${formatarMoeda(subtotal)}</td>
-                    <td class="py-1 px-1 lg:py-3 lg:px-4 text-center">
-                        <button onclick="removerItem(${index})" class="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50">
-                            <i class="ph ph-trash text-xl"></i>
-                        </button>
-                    </td>
-                `;
-                listaEl.appendChild(tr);
+                    const classeInput = item.valor > 0 ? 'border-gray-300 bg-white' : 'border-amber-300 bg-amber-50 placeholder-amber-400';
+
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50 transition-colors group";
+                    tr.innerHTML = `
+                        <td class="py-1 px-1 lg:py-3 lg:px-4 text-gray-700 font-semibold">${item.unidade}x</td>
+                        <td class="py-1 px-1 lg:py-3 lg:px-4 text-gray-900 font-medium">${item.produto}</td>
+                        <td class="py-1 px-1 lg:py-3 lg:px-4">
+                            <div class="relative w-full max-w-[120px]">
+                                <span class="absolute inset-y-0 left-0 pl-1 lg:pl-2 flex items-center text-gray-500 font-medium">R$</span>
+                                <!-- AQUI: inputmode="decimal" tipo text garante que o teclado mobile de vírgulas funcione perfeitamente -->
+                                <input type="text" inputmode="decimal" value="${item.valor > 0 ? item.valor : ''}" onchange="atualizarPreco('${item.id}', this.value)"
+                                    class="w-full pl-6 lg:pl-8 pr-1 lg:pr-2 py-1 lg:py-1.5 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none transition-colors text-gray-700 font-medium ${classeInput}" placeholder="0,00">
+                            </div>
+                        </td>
+                        <td class="py-1 px-1 lg:py-3 lg:px-4 text-blue-700 font-bold hidden md:table-cell">${formatarMoeda(subtotal)}</td>
+                        <td class="py-1 px-1 lg:py-3 lg:px-4 text-center">
+                            <button onclick="removerItem('${item.id}')" class="text-gray-400 hover:text-red-500 transition-colors p-1 lg:p-2 rounded-full hover:bg-red-50">
+                                <i class="ph ph-trash text-lg lg:text-xl"></i>
+                            </button>
+                        </td>
+                    `;
+                    listaEl.appendChild(tr);
+                });
             });
+
             totalEl.textContent = formatarMoeda(totalGeral);
         };
 
@@ -260,18 +310,15 @@
             e.preventDefault();
             const unidade = parseFloat(document.getElementById('unidade').value);
             const produto = document.getElementById('produto').value.trim();
+            const categoria = document.getElementById('categoria').value;
+            
             if (produto && unidade > 0) {
-                compras.push({ unidade, produto, valor: 0 });
+                compras.push({ id: String(gerarId()), unidade, produto, categoria, valor: 0 });
                 atualizarApp();
-                form.reset();
-                document.getElementById('unidade').focus();
+                document.getElementById('produto').value = '';
+                document.getElementById('produto').focus();
             }
         });
-
-        window.removerItem = (index) => {
-            compras.splice(index, 1);
-            atualizarApp();
-        };
 
         btnLimpar.addEventListener('click', () => {
             if (compras.length > 0 && confirm('Apagar todos os itens da lista atual?')) {
@@ -294,7 +341,7 @@
                     id: Date.now(),
                     data: new Date().toISOString(),
                     total: totalCalculado,
-                    itens: [...compras] 
+                    itens: JSON.parse(JSON.stringify(compras))
                 });
                 salvarHistorico();
                 compras = []; 
@@ -303,35 +350,32 @@
             }
         });
 
-        // --- EXIBIÇÃO DO HISTÓRICO ---
-        window.abrirHistorico = () => {
-            modalHistorico.classList.remove('hidden');
-            renderizarHistoricoUI();
-        };
-
-        window.fecharHistorico = () => {
-            modalHistorico.classList.add('hidden');
-        };
-
+        // --- HISTÓRICO ---
+        window.abrirHistorico = () => { modalHistorico.classList.remove('hidden'); renderizarHistoricoUI(); };
+        window.fecharHistorico = () => { modalHistorico.classList.add('hidden'); };
         window.limparHistoricoTudo = () => {
             if(historicoDB.length > 0 && confirm('Apagar TODO o histórico? Isso não pode ser desfeito.')) {
-                historicoDB = [];
-                salvarHistorico();
-                renderizarHistoricoUI();
+                historicoDB = []; salvarHistorico(); renderizarHistoricoUI();
             }
         };
 
         window.reaproveitarLista = (id) => {
             const compra = historicoDB.find(c => c.id === id);
             if (compra) {
-                if (compras.length > 0 && !confirm('Sua lista atual já possui itens. Deseja ADICIONAR os produtos desta lista antiga à sua lista atual?')) return;
+                if (compras.length > 0 && !confirm('Sua lista atual já possui itens. Deseja ADICIONAR os produtos desta lista antiga?')) return;
                 
-                const itensParaCopiar = compra.itens.map(item => ({ unidade: item.unidade, produto: item.produto, valor: 0 }));
+                const itensParaCopiar = compra.itens.map(item => ({ 
+                    id: String(gerarId()), 
+                    unidade: item.unidade, 
+                    produto: item.produto, 
+                    categoria: item.categoria || 'Geral', 
+                    valor: 0 
+                }));
                 compras = [...compras, ...itensParaCopiar];
                 atualizarApp();
                 fecharHistorico();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                setTimeout(() => alert('Lista importada com sucesso! Os preços foram zerados para a nova compra.'), 300);
+                setTimeout(() => alert('Lista importada com sucesso!'), 300);
             }
         };
 
@@ -346,15 +390,20 @@
                 const sanfona = document.createElement('details');
                 sanfona.className = "bg-white border border-gray-200 rounded-xl shadow-sm group";
                 
+                const gruposHist = agruparPorCategoria(compra.itens);
                 let tabelaItensHTML = '';
-                compra.itens.forEach(item => {
-                    tabelaItensHTML += `
-                        <tr class="border-b border-gray-100 last:border-0 text-sm">
-                            <td class="py-2 px-3 text-gray-600">${item.unidade}x</td>
-                            <td class="py-2 px-3 text-gray-800">${item.produto}</td>
-                            <td class="py-2 px-3 text-gray-500 text-right">${formatarMoeda(item.valor)}</td>
-                        </tr>
-                    `;
+                
+                Object.keys(gruposHist).sort().forEach(cat => {
+                    tabelaItensHTML += `<tr><td colspan="3" class="py-1 px-3 bg-gray-50 text-[10px] font-bold text-gray-500 uppercase tracking-wider">${cat}</td></tr>`;
+                    gruposHist[cat].forEach(item => {
+                        tabelaItensHTML += `
+                            <tr class="border-b border-gray-100 last:border-0 text-sm">
+                                <td class="py-2 px-3 text-gray-600">${item.unidade}x</td>
+                                <td class="py-2 px-3 text-gray-800">${item.produto}</td>
+                                <td class="py-2 px-3 text-gray-500 text-right">${formatarMoeda(item.valor)}</td>
+                            </tr>
+                        `;
+                    });
                 });
 
                 sanfona.innerHTML = `
@@ -362,13 +411,13 @@
                         <div class="flex items-center gap-3">
                             <div class="bg-blue-100 text-blue-600 p-2 rounded-lg"><i class="ph ph-calendar-check text-xl"></i></div>
                             <div>
-                                <span class="block text-gray-500 text-xs font-bold uppercase tracking-wider">Data da Compra</span>
+                                <span class="block text-gray-500 text-xs font-bold uppercase tracking-wider">Data</span>
                                 <span class="font-semibold text-gray-800">${formatarData(compra.data)}</span>
                             </div>
                         </div>
                         <div class="flex items-center justify-between sm:justify-end gap-6 sm:w-1/3">
                             <div class="text-right">
-                                <span class="block text-gray-500 text-xs font-bold uppercase tracking-wider">Total Pago</span>
+                                <span class="block text-gray-500 text-xs font-bold uppercase tracking-wider">Total</span>
                                 <span class="font-black text-green-600 text-lg">${formatarMoeda(compra.total)}</span>
                             </div>
                             <i class="ph ph-caret-down text-gray-400 group-open:rotate-180 transition-transform"></i>
@@ -377,22 +426,17 @@
                     <div class="p-5 border-t border-gray-100 bg-gray-50/50">
                         <table class="w-full text-left bg-white border border-gray-200 rounded-lg overflow-hidden mb-4">
                             <thead class="bg-gray-100 text-gray-500 text-xs uppercase">
-                                <tr>
-                                    <th class="py-2 px-3 w-16">Qtd</th>
-                                    <th class="py-2 px-3">Produto</th>
-                                    <th class="py-2 px-3 text-right w-32">Preço Un.</th>
-                                </tr>
+                                <tr><th class="py-2 px-3 w-16">Qtd</th><th class="py-2 px-3">Produto</th><th class="py-2 px-3 text-right w-32">Preço Un.</th></tr>
                             </thead>
                             <tbody>${tabelaItensHTML}</tbody>
                         </table>
                         
                         <div class="flex flex-wrap justify-end gap-3">
-                            <!-- NOVO BOTÃO DE COMPARAR -->
-                            <button onclick="compararLista(${compra.id})" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-lg shadow-sm flex items-center gap-2 font-medium transition-transform transform hover:scale-105 text-sm">
+                            <button onclick="prepararComparacao(${compra.id})" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-lg shadow-sm flex items-center gap-2 font-medium transition-transform transform hover:scale-105 text-sm">
                                 <i class="ph ph-scales text-lg"></i> Comparar
                             </button>
                             <button onclick="reaproveitarLista(${compra.id})" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg shadow-sm flex items-center gap-2 font-medium transition-transform transform hover:scale-105 text-sm">
-                                <i class="ph ph-copy text-lg"></i> Copiar para Lista Atual
+                                <i class="ph ph-copy text-lg"></i> Copiar para Lista
                             </button>
                         </div>
                     </div>
@@ -401,49 +445,67 @@
             });
         };
 
-        // --- SISTEMA DE COMPARAÇÃO (NOVO) ---
-        window.compararLista = (id) => {
-            if (compras.length === 0) {
-                alert('Sua lista atual está vazia. Adicione produtos para poder compará-los com o histórico.');
-                return;
+        // --- COMPARAÇÃO ---
+        let idListaBaseComparacao = null;
+
+        window.prepararComparacao = (id) => {
+            idListaBaseComparacao = id;
+            const compraBase = historicoDB.find(c => c.id === id);
+            if (!compraBase) return;
+
+            subtituloComparacao.innerHTML = `Lista Base Fixa: <strong>${formatarData(compraBase.data)}</strong>`;
+            seletorAlvoComparacao.innerHTML = '<option value="atual">Minha Lista Atual (Carrinho)</option>';
+            historicoDB.forEach(hist => {
+                if(hist.id !== id) seletorAlvoComparacao.innerHTML += `<option value="${hist.id}">Lista do dia ${formatarData(hist.data)}</option>`;
+            });
+
+            window.atualizarTabelaComparacao();
+            modalComparacao.classList.remove('hidden');
+        };
+
+        window.atualizarTabelaComparacao = () => {
+            const compraBase = historicoDB.find(c => c.id === idListaBaseComparacao);
+            if (!compraBase) return;
+
+            const idAlvo = seletorAlvoComparacao.value;
+            let listaAlvo = [];
+
+            if (idAlvo === 'atual') {
+                listaAlvo = compras;
+                headerPrecoAlvo.innerHTML = `Lista Atual <span class="block text-[10px] text-purple-300 font-normal">Preço agora</span>`;
+            } else {
+                const compraAlvo = historicoDB.find(c => c.id == idAlvo);
+                if (compraAlvo) {
+                    listaAlvo = compraAlvo.itens;
+                    headerPrecoAlvo.innerHTML = `Lista ${formatarData(compraAlvo.data)} <span class="block text-[10px] text-purple-300 font-normal">Preço da época</span>`;
+                }
             }
 
-            const compraAntiga = historicoDB.find(c => c.id === id);
-            if (!compraAntiga) return;
-
-            subtituloComparacao.textContent = `Em relação à compra do dia ${formatarData(compraAntiga.data)}`;
             conteudoComparacao.innerHTML = '';
             let itensComparados = 0;
 
-            compras.forEach(itemAtual => {
-                // Procura um produto com o mesmo nome (ignorando maiúsculas/minúsculas)
-                const itemAntigo = compraAntiga.itens.find(i => i.produto.toLowerCase().trim() === itemAtual.produto.toLowerCase().trim());
-                
-                // Só compara se o produto existir na lista antiga e se já tivermos preenchido algum valor atual
-                if (itemAntigo && itemAntigo.valor > 0 && itemAtual.valor > 0) {
+            listaAlvo.forEach(itemAlvo => {
+                const itemBase = compraBase.itens.find(i => i.produto.toLowerCase().trim() === itemAlvo.produto.toLowerCase().trim());
+                if (itemBase && itemBase.valor > 0 && itemAlvo.valor > 0) {
                     itensComparados++;
-                    const diferenca = itemAtual.valor - itemAntigo.valor;
+                    const diferenca = itemAlvo.valor - itemBase.valor;
                     
                     let corTexto = "text-gray-500";
-                    let icone = `<i class="ph ph-equals"></i> Igual`;
+                    let icone = `<i class="ph ph-equals"></i> Manteve`;
                     let valorDiferenca = "-";
 
                     if (diferenca > 0) {
-                        corTexto = "text-red-500";
-                        icone = `<i class="ph ph-trend-up"></i> Aumentou`;
-                        valorDiferenca = `+ ${formatarMoeda(diferenca)}`;
+                        corTexto = "text-red-500"; icone = `<i class="ph ph-trend-up"></i> Aumentou`; valorDiferenca = `+ ${formatarMoeda(diferenca)}`;
                     } else if (diferenca < 0) {
-                        corTexto = "text-green-500";
-                        icone = `<i class="ph ph-trend-down"></i> Baixou`;
-                        valorDiferenca = `- ${formatarMoeda(Math.abs(diferenca))}`;
+                        corTexto = "text-green-500"; icone = `<i class="ph ph-trend-down"></i> Baixou`; valorDiferenca = `- ${formatarMoeda(Math.abs(diferenca))}`;
                     }
 
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-gray-50 border-b border-gray-100";
                     tr.innerHTML = `
-                        <td class="py-3 px-4 text-gray-800 font-medium">${itemAtual.produto}</td>
-                        <td class="py-3 px-4 text-center text-gray-500">${formatarMoeda(itemAntigo.valor)}</td>
-                        <td class="py-3 px-4 text-center font-semibold text-gray-800">${formatarMoeda(itemAtual.valor)}</td>
+                        <td class="py-3 px-4 text-gray-800 font-medium">${itemAlvo.produto}</td>
+                        <td class="py-3 px-4 text-center text-gray-500">${formatarMoeda(itemBase.valor)}</td>
+                        <td class="py-3 px-4 text-center font-semibold text-purple-700 bg-purple-50/50">${formatarMoeda(itemAlvo.valor)}</td>
                         <td class="py-3 px-4 text-right font-bold ${corTexto} flex flex-col items-end">
                             <span>${valorDiferenca}</span>
                             <span class="text-[10px] uppercase font-bold tracking-wider flex items-center gap-1 opacity-70">${icone}</span>
@@ -454,29 +516,20 @@
             });
 
             if (itensComparados === 0) {
-                mensagemSemComparacao.classList.remove('hidden');
-                conteudoComparacao.parentElement.classList.add('hidden');
+                mensagemSemComparacao.classList.remove('hidden'); conteudoComparacao.parentElement.classList.add('hidden');
             } else {
-                mensagemSemComparacao.classList.add('hidden');
-                conteudoComparacao.parentElement.classList.remove('hidden');
+                mensagemSemComparacao.classList.add('hidden'); conteudoComparacao.parentElement.classList.remove('hidden');
             }
-
-            modalComparacao.classList.remove('hidden');
         };
 
-        window.fecharComparacao = () => {
-            modalComparacao.classList.add('hidden');
-        };
+        window.fecharComparacao = () => modalComparacao.classList.add('hidden');
 
         // --- IMPORTAR / EXPORTAR ---
         csvInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = (evento) => {
-                processarCSV(evento.target.result);
-                csvInput.value = ''; 
-            };
+            reader.onload = (evento) => { processarCSV(evento.target.result); csvInput.value = ''; };
             reader.readAsText(file);
         });
 
@@ -486,50 +539,49 @@
             linhas.forEach((linha, index) => {
                 if (index === 0 && linha.toLowerCase().includes('produto')) return;
                 const colunas = linha.includes(';') ? linha.split(';') : linha.split(',');
+                
                 if (colunas.length >= 2) {
                     const unidade = parseFloat(colunas[0].trim());
                     const produto = colunas[1].trim();
+                    let categoria = 'Geral';
                     let valor = 0;
-                    if(colunas[2]) {
-                        valor = parseFloat(colunas[2].trim().replace('R$', '').replace(',', '.')) || 0;
+
+                    if(colunas.length === 3) {
+                        const parsingVar = parseFloat(colunas[2].replace('R$', '').replace(',', '.'));
+                        if(!isNaN(parsingVar)) { valor = parsingVar; } else { categoria = colunas[2].trim() || 'Geral'; }
+                    } else if (colunas.length >= 4) {
+                        categoria = colunas[2].trim() || 'Geral';
+                        valor = parseFloat(colunas[3].replace('R$', '').replace(',', '.')) || 0;
                     }
+
                     if (!isNaN(unidade) && produto) {
-                        compras.push({ unidade, produto, valor });
+                        compras.push({ id: String(gerarId()), unidade, produto, categoria, valor });
                         importados++;
                     }
                 }
             });
-            if (importados > 0) {
-                atualizarApp();
-                alert(`${importados} itens importados!`);
-            }
+            if (importados > 0) { atualizarApp(); alert(`${importados} itens importados com sucesso!`); }
         };
 
         btnExportar.addEventListener('click', () => {
             if (compras.length === 0) { alert('A lista está vazia!'); return; }
-            let csvContent = "unidade,produto,valor\n";
+            let csvContent = "unidade,produto,categoria,valor\n";
             compras.forEach(item => {
-                csvContent += `${item.unidade},${item.produto.replace(/,/g, '')},${(item.valor || 0).toFixed(2)}\n`;
+                csvContent += `${item.unidade},${item.produto.replace(/,/g, '')},${item.categoria || 'Geral'},${(item.valor || 0).toFixed(2)}\n`;
             });
             const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = 'lista_compras.csv';
+            link.download = 'lista_compras_categorizada.csv';
             link.click();
         });
 
-        // Inicialização
         renderizarLista();
     </script>
     
     <style>
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .animate-fade-in {
-            animation: fadeIn 0.2s ease-out forwards;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .animate-fade-in { animation: fadeIn 0.2s ease-out forwards; }
     </style>
 </body>
 </html>
