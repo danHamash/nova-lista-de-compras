@@ -45,11 +45,13 @@
                             <i class="ph ph-upload-simple text-xl"></i> Importar CSV
                             <input type="file" id="csvFileInput" accept=".csv" class="hidden" />
                         </label>
-                        <button id="btnWhatsApp" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow transition-colors flex items-center justify-center gap-2 font-medium">
-                            <i class="ph ph-whatsapp-logo text-xl"></i> Wpp (Planilha)
+                        <!-- BOTÃO WHATSAPP (Mensagem de Texto formatada, funciona 100% dos celulares) -->
+                        <button id="btnWhatsAppTexto" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow transition-colors flex items-center justify-center gap-2 font-medium">
+                            <i class="ph ph-whatsapp-logo text-xl"></i> Wpp (Texto)
                         </button>
-                        <button id="btnExportar" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg shadow transition-colors flex items-center justify-center gap-2 font-medium">
-                            <i class="ph ph-download-simple text-xl"></i> Baixar CSV
+                        <!-- BOTÃO EXPORTAR (Download seguro ou Compartilhamento Nativo) -->
+                        <button id="btnExportarPlanilha" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg shadow transition-colors flex items-center justify-center gap-2 font-medium">
+                            <i class="ph ph-download-simple text-xl"></i> Baixar Planilha
                         </button>
                     </div>
                 </div>
@@ -145,7 +147,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE COMPARAÇÃO RESPONSIVO -->
+    <!-- MODAL DE COMPARAÇÃO CRONOLÓGICO -->
     <div id="modalComparacao" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-md p-2 sm:p-4">
         <div class="bg-white w-full max-w-3xl max-h-[95vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
             <div class="bg-purple-600 text-white p-4 sm:p-5 flex justify-between items-center shadow-md">
@@ -174,8 +176,8 @@
                             <thead>
                                 <tr class="bg-gray-100 text-gray-500 text-[10px] sm:text-xs uppercase tracking-wider border-b border-gray-200">
                                     <th class="py-2 px-2 lg:py-3 lg:px-4 font-bold">Produto</th>
-                                    <th class="py-2 px-1 lg:py-3 lg:px-4 font-bold text-center">Base</th>
-                                    <th id="headerPrecoAlvo" class="py-2 px-1 lg:py-3 lg:px-4 font-bold text-center text-purple-700">Atual</th>
+                                    <th id="headerPrecoAntigo" class="py-2 px-1 lg:py-3 lg:px-4 font-bold text-center">Antigo</th>
+                                    <th id="headerPrecoRecente" class="py-2 px-1 lg:py-3 lg:px-4 font-bold text-center text-purple-700">Recente</th>
                                     <th class="py-2 px-2 lg:py-3 lg:px-4 font-bold text-right">Variação</th>
                                 </tr>
                             </thead>
@@ -193,13 +195,14 @@
 
     <!-- Lógica JavaScript -->
     <script>
+        // Referências
         const form = document.getElementById('itemForm');
         const listaEl = document.getElementById('listaCompras');
         const totalEl = document.getElementById('valorTotal');
         const btnLimpar = document.getElementById('limparLista');
         const csvInput = document.getElementById('csvFileInput');
-        const btnExportar = document.getElementById('btnExportar');
-        const btnWhatsApp = document.getElementById('btnWhatsApp');
+        const btnWhatsAppTexto = document.getElementById('btnWhatsAppTexto');
+        const btnExportarPlanilha = document.getElementById('btnExportarPlanilha');
         const btnFinalizar = document.getElementById('btnFinalizar');
         
         const modalHistorico = document.getElementById('modalHistorico');
@@ -209,24 +212,18 @@
         const subtituloComparacao = document.getElementById('subtituloComparacao');
         const mensagemSemComparacao = document.getElementById('mensagemSemComparacao');
         const seletorAlvoComparacao = document.getElementById('seletorAlvoComparacao');
-        const headerPrecoAlvo = document.getElementById('headerPrecoAlvo');
+        const headerPrecoAntigo = document.getElementById('headerPrecoAntigo');
+        const headerPrecoRecente = document.getElementById('headerPrecoRecente');
 
         const gerarId = () => Date.now().toString(36) + Math.random().toString(36).substring(2);
 
+        // Bancos de Dados Local Storage
         let compras = JSON.parse(localStorage.getItem('minhaListaComprasDB')) || [];
         compras = compras.map(item => ({...item, id: item.id ? String(item.id) : gerarId(), categoria: item.categoria || 'Geral'}));
-        
         let historicoDB = JSON.parse(localStorage.getItem('meuHistoricoDB')) || [];
 
-        const atualizarApp = () => {
-            localStorage.setItem('minhaListaComprasDB', JSON.stringify(compras));
-            renderizarLista();
-        };
-
-        const salvarHistorico = () => {
-            localStorage.setItem('meuHistoricoDB', JSON.stringify(historicoDB));
-        };
-
+        const atualizarApp = () => { localStorage.setItem('minhaListaComprasDB', JSON.stringify(compras)); renderizarLista(); };
+        const salvarHistorico = () => { localStorage.setItem('meuHistoricoDB', JSON.stringify(historicoDB)); };
         const formatarMoeda = (valor) => Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         const formatarData = (isoString) => new Date(isoString).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
@@ -239,6 +236,7 @@
             }, {});
         };
 
+        // --- MANIPULAÇÃO DA LISTA ATUAL ---
         window.atualizarPreco = (id, novoValorTexto) => {
             const index = compras.findIndex(c => String(c.id) === String(id));
             if(index > -1) {
@@ -251,10 +249,7 @@
 
         window.removerItem = (id) => {
             const index = compras.findIndex(c => String(c.id) === String(id));
-            if(index > -1) {
-                compras.splice(index, 1);
-                atualizarApp();
-            }
+            if(index > -1) { compras.splice(index, 1); atualizarApp(); }
         };
 
         const renderizarLista = () => {
@@ -278,7 +273,6 @@
                 grupos[categoria].forEach((item) => {
                     const subtotal = item.unidade * (item.valor || 0);
                     totalGeral += subtotal;
-
                     const classeInput = item.valor > 0 ? 'border-gray-300 bg-white' : 'border-amber-300 bg-amber-50 placeholder-amber-400';
 
                     const tr = document.createElement('tr');
@@ -323,18 +317,14 @@
 
         btnLimpar.addEventListener('click', () => {
             if (compras.length > 0 && confirm('Apagar todos os itens da lista atual?')) {
-                compras = [];
-                atualizarApp();
+                compras = []; atualizarApp();
             }
         });
 
         btnFinalizar.addEventListener('click', () => {
             if(compras.length === 0) { alert('Sua lista está vazia!'); return; }
             const temPreco = compras.some(item => item.valor > 0);
-            if(!temPreco) {
-                alert('Preencha o preço de pelo menos um produto para finalizar e salvar no histórico.');
-                return;
-            }
+            if(!temPreco) { alert('Preencha o preço de pelo menos um produto para finalizar e salvar no histórico.'); return; }
 
             if(confirm('Deseja finalizar esta compra e arquivar a lista no histórico?')) {
                 const totalCalculado = compras.reduce((acc, item) => acc + (item.unidade * (item.valor || 0)), 0);
@@ -351,7 +341,7 @@
             }
         });
 
-        // --- HISTÓRICO ---
+        // --- HISTÓRICO UI ---
         window.abrirHistorico = () => { modalHistorico.classList.remove('hidden'); renderizarHistoricoUI(); };
         window.fecharHistorico = () => { modalHistorico.classList.add('hidden'); };
         window.limparHistoricoTudo = () => {
@@ -364,19 +354,13 @@
             const compra = historicoDB.find(c => c.id === id);
             if (compra) {
                 if (compras.length > 0 && !confirm('Sua lista atual já possui itens. Deseja ADICIONAR os produtos desta lista antiga?')) return;
-                
                 const itensParaCopiar = compra.itens.map(item => ({ 
-                    id: String(gerarId()), 
-                    unidade: item.unidade, 
-                    produto: item.produto, 
-                    categoria: item.categoria || 'Geral', 
-                    valor: 0 
+                    id: String(gerarId()), unidade: item.unidade, produto: item.produto, categoria: item.categoria || 'Geral', valor: 0 
                 }));
                 compras = [...compras, ...itensParaCopiar];
                 atualizarApp();
                 fecharHistorico();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                setTimeout(() => alert('Lista importada com sucesso!'), 300);
             }
         };
 
@@ -393,7 +377,6 @@
                 
                 const gruposHist = agruparPorCategoria(compra.itens);
                 let tabelaItensHTML = '';
-                
                 Object.keys(gruposHist).sort().forEach(cat => {
                     tabelaItensHTML += `<tr><td colspan="3" class="py-1 px-3 bg-gray-50 text-[10px] font-bold text-gray-500 uppercase tracking-wider">${cat}</td></tr>`;
                     gruposHist[cat].forEach(item => {
@@ -431,7 +414,6 @@
                             </thead>
                             <tbody>${tabelaItensHTML}</tbody>
                         </table>
-                        
                         <div class="flex flex-wrap justify-end gap-3">
                             <button onclick="prepararComparacao(${compra.id})" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-lg shadow-sm flex items-center gap-2 font-medium transition-transform transform hover:scale-105 text-sm">
                                 <i class="ph ph-scales text-lg"></i> Comparar
@@ -446,7 +428,7 @@
             });
         };
 
-        // --- COMPARAÇÃO CRONOLÓGICA ---
+        // --- COMPARAÇÃO CRONOLÓGICA INTELIGENTE ---
         let idListaBaseComparacao = null;
 
         window.prepararComparacao = (id) => {
@@ -470,57 +452,61 @@
 
             const idAlvo = seletorAlvoComparacao.value;
             let listaAlvo = [];
-            let dataAlvoMs = Date.now(); // se for 'atual', a data é o momento presente
+            let dataAlvoMs = Date.now(); // Lista atual = Agora
 
             if (idAlvo === 'atual') {
                 listaAlvo = compras;
-                headerPrecoAlvo.innerHTML = `Lista Atual <span class="block text-[8px] sm:text-[10px] text-purple-300 font-normal">Preço agora</span>`;
             } else {
                 const compraAlvo = historicoDB.find(c => c.id == idAlvo);
                 if (compraAlvo) {
                     listaAlvo = compraAlvo.itens;
                     dataAlvoMs = new Date(compraAlvo.data).getTime();
-                    headerPrecoAlvo.innerHTML = `Lista Sel. <span class="block text-[8px] sm:text-[10px] text-purple-300 font-normal">${formatarData(compraAlvo.data).substring(0,5)}</span>`;
                 }
             }
 
             const dataBaseMs = new Date(compraBase.data).getTime();
             
-            // Determina a ordem no tempo de forma 100% cronológica
-            const baseIsMaisRecente = dataBaseMs > dataAlvoMs;
+            // LÓGICA CRONOLÓGICA: Descobre quem é a lista mais Antiga e a mais Recente
+            const baseIsAntiga = dataBaseMs <= dataAlvoMs;
+            
+            const listaAntiga = baseIsAntiga ? compraBase.itens : listaAlvo;
+            const listaRecente = baseIsAntiga ? listaAlvo : compraBase.itens;
+
+            const nomeAntiga = baseIsAntiga ? formatarData(compraBase.data).substring(0,5) : (idAlvo === 'atual' ? 'Hoje' : formatarData(dataAlvoMs).substring(0,5));
+            const nomeRecente = !baseIsAntiga ? formatarData(compraBase.data).substring(0,5) : (idAlvo === 'atual' ? 'Hoje' : formatarData(dataAlvoMs).substring(0,5));
+
+            headerPrecoAntigo.innerHTML = `Antigo <span class="block text-[8px] sm:text-[10px] text-gray-400 font-normal">${nomeAntiga}</span>`;
+            headerPrecoRecente.innerHTML = `Recente <span class="block text-[8px] sm:text-[10px] text-purple-300 font-normal">${nomeRecente}</span>`;
 
             conteudoComparacao.innerHTML = '';
             let itensComparados = 0;
 
-            listaAlvo.forEach(itemAlvo => {
-                const itemBase = compraBase.itens.find(i => i.produto.toLowerCase().trim() === itemAlvo.produto.toLowerCase().trim());
-                if (itemBase && itemBase.valor > 0 && itemAlvo.valor > 0) {
+            // Varre a lista Recente procurando os itens na lista Antiga
+            listaRecente.forEach(itemRecente => {
+                const itemAntigo = listaAntiga.find(i => i.produto.toLowerCase().trim() === itemRecente.produto.toLowerCase().trim());
+                
+                if (itemAntigo && itemAntigo.valor > 0 && itemRecente.valor > 0) {
                     itensComparados++;
                     
-                    // Cálculo cronológico independente da UI: O que aconteceu com o preço ao longo do tempo?
-                    let diferenca = 0;
-                    if (baseIsMaisRecente) {
-                        diferenca = itemBase.valor - itemAlvo.valor; // Base é a mais nova, Alvo é a antiga
-                    } else {
-                        diferenca = itemAlvo.valor - itemBase.valor; // Alvo é a mais nova, Base é a antiga
-                    }
+                    // Cálculo Cronológico: Preço Hoje - Preço Ontem
+                    const diferenca = itemRecente.valor - itemAntigo.valor;
                     
                     let corTexto = "text-gray-500";
                     let icone = `<i class="ph ph-equals"></i> Manteve`;
                     let valorDiferenca = "-";
 
                     if (diferenca > 0) {
-                        corTexto = "text-red-500"; icone = `<i class="ph ph-trend-up"></i> Aumentou`; valorDiferenca = `+ ${formatarMoeda(diferenca)}`;
+                        corTexto = "text-red-500"; icone = `<i class="ph ph-trend-up"></i> Subiu`; valorDiferenca = `+ ${formatarMoeda(diferenca)}`;
                     } else if (diferenca < 0) {
-                        corTexto = "text-green-500"; icone = `<i class="ph ph-trend-down"></i> Reduziu`; valorDiferenca = `- ${formatarMoeda(Math.abs(diferenca))}`;
+                        corTexto = "text-green-500"; icone = `<i class="ph ph-trend-down"></i> Baixou`; valorDiferenca = `- ${formatarMoeda(Math.abs(diferenca))}`;
                     }
 
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-gray-50 border-b border-gray-100 text-xs sm:text-sm";
                     tr.innerHTML = `
-                        <td class="py-2 px-2 lg:py-3 lg:px-4 text-gray-800 font-medium break-words max-w-[100px] sm:max-w-none">${itemAlvo.produto}</td>
-                        <td class="py-2 px-1 lg:py-3 lg:px-4 text-center text-gray-500">${formatarMoeda(itemBase.valor)}</td>
-                        <td class="py-2 px-1 lg:py-3 lg:px-4 text-center font-semibold text-purple-700 bg-purple-50/50">${formatarMoeda(itemAlvo.valor)}</td>
+                        <td class="py-2 px-2 lg:py-3 lg:px-4 text-gray-800 font-medium break-words max-w-[100px] sm:max-w-none">${itemRecente.produto}</td>
+                        <td class="py-2 px-1 lg:py-3 lg:px-4 text-center text-gray-500">${formatarMoeda(itemAntigo.valor)}</td>
+                        <td class="py-2 px-1 lg:py-3 lg:px-4 text-center font-semibold text-purple-700 bg-purple-50/50">${formatarMoeda(itemRecente.valor)}</td>
                         <td class="py-2 px-2 lg:py-3 lg:px-4 text-right font-bold ${corTexto} flex flex-col items-end">
                             <span>${valorDiferenca}</span>
                             <span class="text-[8px] sm:text-[10px] uppercase font-bold tracking-wider flex items-center gap-1 opacity-70">${icone}</span>
@@ -544,42 +530,64 @@
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = (evento) => { processarCSV(evento.target.result); csvInput.value = ''; };
+            reader.onload = (evento) => {
+                const linhas = evento.target.result.split('\n');
+                let importados = 0;
+                linhas.forEach((linha, index) => {
+                    if (index === 0 && linha.toLowerCase().includes('produto')) return;
+                    const colunas = linha.includes(';') ? linha.split(';') : linha.split(',');
+                    
+                    if (colunas.length >= 2) {
+                        const unidade = parseFloat(colunas[0].trim());
+                        const produto = colunas[1].trim();
+                        let categoria = 'Geral';
+                        let valor = 0;
+
+                        if(colunas.length === 3) {
+                            const parsingVar = parseFloat(colunas[2].replace('R$', '').replace(',', '.'));
+                            if(!isNaN(parsingVar)) { valor = parsingVar; } else { categoria = colunas[2].trim() || 'Geral'; }
+                        } else if (colunas.length >= 4) {
+                            categoria = colunas[2].trim() || 'Geral';
+                            valor = parseFloat(colunas[3].replace('R$', '').replace(',', '.')) || 0;
+                        }
+
+                        if (!isNaN(unidade) && produto) {
+                            compras.push({ id: String(gerarId()), unidade, produto, categoria, valor });
+                            importados++;
+                        }
+                    }
+                });
+                if (importados > 0) { atualizarApp(); alert(`${importados} itens importados com sucesso!`); }
+                csvInput.value = ''; 
+            };
             reader.readAsText(file);
         });
 
-        const processarCSV = (csvTexto) => {
-            const linhas = csvTexto.split('\n');
-            let importados = 0;
-            linhas.forEach((linha, index) => {
-                if (index === 0 && linha.toLowerCase().includes('produto')) return;
-                const colunas = linha.includes(';') ? linha.split(';') : linha.split(',');
-                
-                if (colunas.length >= 2) {
-                    const unidade = parseFloat(colunas[0].trim());
-                    const produto = colunas[1].trim();
-                    let categoria = 'Geral';
-                    let valor = 0;
-
-                    if(colunas.length === 3) {
-                        const parsingVar = parseFloat(colunas[2].replace('R$', '').replace(',', '.'));
-                        if(!isNaN(parsingVar)) { valor = parsingVar; } else { categoria = colunas[2].trim() || 'Geral'; }
-                    } else if (colunas.length >= 4) {
-                        categoria = colunas[2].trim() || 'Geral';
-                        valor = parseFloat(colunas[3].replace('R$', '').replace(',', '.')) || 0;
-                    }
-
-                    if (!isNaN(unidade) && produto) {
-                        compras.push({ id: String(gerarId()), unidade, produto, categoria, valor });
-                        importados++;
-                    }
-                }
+        // --- WPP (TEXTO) ---
+        btnWhatsAppTexto.addEventListener('click', () => {
+            if (compras.length === 0) { alert('A lista está vazia!'); return; }
+            
+            let textoWpp = "🛒 *MINHA LISTA DE COMPRAS* 🛒\n\n";
+            const grupos = agruparPorCategoria(compras);
+            
+            Object.keys(grupos).sort().forEach(cat => {
+                textoWpp += `*--- ${cat.toUpperCase()} ---*\n`;
+                grupos[cat].forEach(item => {
+                    textoWpp += `• ${item.unidade}x ${item.produto}`;
+                    if(item.valor > 0) { textoWpp += ` (R$ ${item.valor.toFixed(2).replace('.', ',')})`; }
+                    textoWpp += `\n`;
+                });
+                textoWpp += `\n`;
             });
-            if (importados > 0) { atualizarApp(); alert(`${importados} itens importados com sucesso!`); }
-        };
+            
+            const total = compras.reduce((acc, item) => acc + (item.unidade * (item.valor || 0)), 0);
+            if(total > 0) { textoWpp += `💰 *Total: R$ ${total.toFixed(2).replace('.', ',')}*\n`; }
+            
+            window.open(`https://wa.me/?text=${encodeURIComponent(textoWpp)}`, '_blank');
+        });
 
-        // --- EXPORTAR WHATSAPP (COMPARTILHAMENTO DE ARQUIVO) ---
-        btnWhatsApp.addEventListener('click', async () => {
+        // --- BAIXAR PLANILHA CSV (CORREÇÃO GOOGLE CHROME/SAFARI) ---
+        btnExportarPlanilha.addEventListener('click', async () => {
             if (compras.length === 0) { alert('A lista está vazia!'); return; }
             
             let csvContent = "unidade,produto,categoria,valor\n";
@@ -589,61 +597,37 @@
                 const val = (item.valor || 0).toFixed(2);
                 csvContent += `${item.unidade},${prod},${cat},${val}\n`;
             });
-            
+
             const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
             const fileName = 'lista_compras.csv';
 
+            // Tenta Compartilhar via Menu Nativo do iOS/Android
             if (navigator.canShare) {
                 const file = new File([blob], fileName, { type: 'text/csv' });
                 if (navigator.canShare({ files: [file] })) {
                     try {
-                        await navigator.share({
-                            files: [file],
-                            title: 'Lista de Compras'
-                        });
-                        return; 
+                        await navigator.share({ files: [file], title: 'Lista de Compras' });
+                        return; // Se funcionou, finaliza.
                     } catch (error) {
-                        return; 
+                        console.log("Compartilhamento cancelado");
+                        // Continua para o download normal se der erro
                     }
                 }
             }
-            
-            alert('Seu aparelho não suporta o menu de compartilhamento nativo. O arquivo da planilha será baixado e você poderá enviá-lo pelo WhatsApp Web.');
-            
-            const encodedUri = "data:text/csv;charset=utf-8," + encodeURIComponent("\uFEFF" + csvContent);
+
+            // O Padrão Ouro para Download em Chrome, Edge, Firefox e Safari (PC/Mobile)
+            const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = encodedUri;
-            link.download = fileName;
+            link.href = url;
+            link.setAttribute('download', fileName);
             document.body.appendChild(link);
             link.click();
-            document.body.removeChild(link);
-        });
-
-        // --- EXPORTAR ARQUIVO (DOWNLOAD INFALÍVEL PARA QUALQUER NAVEGADOR) ---
-        btnExportar.addEventListener('click', () => {
-            try {
-                if (compras.length === 0) { alert('A lista está vazia!'); return; }
-                
-                let csvContent = "unidade,produto,categoria,valor\n";
-                compras.forEach(item => {
-                    const prod = item.produto ? String(item.produto).replace(/,/g, '') : "Item";
-                    const cat = item.categoria ? String(item.categoria) : 'Geral';
-                    const val = (item.valor || 0).toFixed(2);
-                    csvContent += `${item.unidade},${prod},${cat},${val}\n`;
-                });
-                
-                const encodedUri = "data:text/csv;charset=utf-8," + encodeURIComponent("\uFEFF" + csvContent);
-                const link = document.createElement('a');
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", "minha_lista_compras.csv");
-                
-                document.body.appendChild(link);
-                link.click();
+            
+            // Limpa o link da memória para evitar vazamento
+            setTimeout(() => {
                 document.body.removeChild(link);
-
-            } catch (err) {
-                alert("Ocorreu um erro ao exportar: " + err.message);
-            }
+                window.URL.revokeObjectURL(url);
+            }, 100);
         });
 
         renderizarLista();
