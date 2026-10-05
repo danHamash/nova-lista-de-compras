@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Compras Dinâmica</title>
+    <!-- Importando Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Importando Ícones -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body class="min-h-screen bg-cover bg-center bg-fixed flex flex-col items-center py-10 px-4 text-gray-800" 
+      style="background-image: url('./assets/img/fundo.avif');">
+    
+    <!-- Película escura sobre a imagem -->
+    <div class="fixed inset-0 bg-black/60 z-0"></div>
+
+    <!-- Container Principal -->
+    <main class="relative z-10 w-full max-w-4xl bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+        
+        <!-- Cabeçalho -->
+        <header class="bg-blue-600/90 text-white p-6 flex flex-col sm:flex-row items-center justify-between shadow-md gap-4">
+            <h1 class="text-3xl font-bold tracking-wide flex items-center gap-2">
+                <i class="ph ph-shopping-cart text-4xl"></i>
+                Minha Lista
+            </h1>
+            <button onclick="abrirHistorico()" class="bg-blue-800 hover:bg-blue-900 text-white px-5 py-2 rounded-lg shadow flex items-center gap-2 font-semibold transition-colors">
+                <i class="ph ph-clock-counter-clockwise text-xl"></i> Histórico de Compras
+            </button>
+        </header>
+
+        <div class="p-2 sm:p-8 flex-1">
+            
+            <!-- Seção de Importação / Exportação -->
+            <div class="mb-8 p-5 bg-blue-50/80 border border-blue-200 rounded-xl shadow-sm">
+                <div class="flex flex-col md:flex-row items-center gap-4 justify-between">
+                    <div class="flex-1 text-center md:text-left">
+                        <h2 class="text-lg font-bold text-blue-900 flex items-center justify-center md:justify-start gap-2 mb-1">
+                            <i class="ph ph-files text-2xl"></i> Planilha (CSV)
+                        </h2>
+                    </div>
+                    <div class="flex flex-col sm:flex-row w-full md:w-auto gap-3">
+                        <label class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition-colors flex items-center justify-center gap-2 font-medium">
+                            <i class="ph ph-upload-simple text-xl"></i> Importar
+                            <input type="file" id="csvFileInput" accept=".csv" class="hidden" />
+                        </label>
+                        <button id="btnExportar" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg shadow transition-colors flex items-center justify-center gap-2 font-medium">
+                            <i class="ph ph-download-simple text-xl"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulário de Inserção -->
+            <form id="itemForm" class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-8 bg-gray-50 p-5 rounded-xl border border-gray-200 shadow-sm">
+                <div class="sm:col-span-3">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Quantidade</label>
+                    <input type="number" id="unidade" placeholder="Ex: 2" required min="1" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                </div>
+                <div class="sm:col-span-8">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">O que vamos comprar?</label>
+                    <input type="text" id="produto" placeholder="Nome do produto..." required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                </div>
+                <div class="sm:col-span-1 flex items-end">
+                    <button type="submit" title="Adicionar à Lista" class="w-full h-[50px] bg-green-500 hover:bg-green-600 text-white rounded-lg flex items-center justify-center shadow transition-transform transform hover:scale-105">
+                        <i class="ph ph-plus text-2xl"></i>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Tabela da Lista Atual -->
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[300px] lg:min-w-[600px]">
+                        <thead class="">
+                            <tr class="bg-gray-100 text-gray-600 uppercase text-xs tracking-wider border-b border-gray-200 ">
+                                <th class=" py-1 px-1 lg:py-3 lg:px-4 font-bold ">Qtd</th>
+                                <th class=" py-1 px-1  lg:py-3 lg:px-4 font-bold ">Produto</th>
+                                <th class="py-1 px-1 lg:py-3 lg:px-4 font-bold ">Preço</th>
+                                <th class=" py-1 px-1 lg:py-3 lg:px-4 font-bold ">Subtotal</th>
+                                <th class=" py-1 px-1 lg:py-3 lg:px-4 font-bold text-center">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaCompras" class="divide-y divide-gray-100  text-sm md:text-base">
+                            <!-- Itens dinâmicos -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Rodapé e Ações Finais -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-6 bg-gray-800 text-white p-6 rounded-xl shadow-lg mt-auto">
+                <button id="limparLista" class="text-red-400 hover:text-red-300 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2 bg-red-400/10 hover:bg-red-400/20 w-full sm:w-auto justify-center">
+                    <i class="ph ph-trash"></i> Esvaziar
+                </button>
+                
+                <div class="flex flex-col sm:flex-row items-center gap-6 w-full sm:w-auto">
+                    <div class="text-center sm:text-right">
+                        <span class="text-gray-400 text-sm font-bold uppercase tracking-wider block mb-1">Total da Compra</span>
+                        <span id="valorTotal" class="text-3xl font-black text-green-400">R$ 0,00</span>
+                    </div>
+                    <button id="btnFinalizar" class="bg-green-500 hover:bg-green-600 text-white px-6 py-4 rounded-xl shadow-lg transition-transform transform hover:scale-105 flex items-center justify-center gap-2 font-bold w-full sm:w-auto text-lg">
+                        <i class="ph ph-check-circle text-2xl"></i> Finalizar Compra
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MODAL DO HISTÓRICO -->
+    <div id="modalHistorico" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
+            <!-- Cabeçalho -->
+            <div class="bg-gray-100 border-b border-gray-200 p-6 flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="ph ph-clock-counter-clockwise text-blue-600"></i> Histórico de Compras
+                </h2>
+                <button onclick="fecharHistorico()" class="text-gray-500 hover:text-red-500 transition-colors bg-gray-200 hover:bg-red-100 p-2 rounded-full">
+                    <i class="ph ph-x text-xl font-bold"></i>
+                </button>
+            </div>
+            <!-- Lista -->
+            <div id="conteudoHistorico" class="p-6 overflow-y-auto flex-1 bg-gray-50 space-y-4"></div>
+            <!-- Rodapé -->
+            <div class="bg-gray-100 border-t border-gray-200 p-4 text-center">
+                <button onclick="limparHistoricoTudo()" class="text-red-500 hover:text-red-700 font-semibold text-sm">
+                    Apagar todo o histórico
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE COMPARAÇÃO (NOVO) -->
+    <div id="modalComparacao" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div class="bg-white w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
+            <div class="bg-purple-600 text-white p-5 flex justify-between items-center shadow-md">
+                <div>
+                    <h2 class="text-xl font-bold flex items-center gap-2">
+                        <i class="ph ph-scales text-2xl"></i> Comparação de Preços
+                    </h2>
+                    <p id="subtituloComparacao" class="text-purple-200 text-sm mt-1"></p>
+                </div>
+                <button onclick="fecharComparacao()" class="text-white hover:text-red-300 transition-colors bg-purple-700 hover:bg-purple-800 p-2 rounded-full">
+                    <i class="ph ph-x text-xl font-bold"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1 bg-gray-50">
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse min-w-[500px]">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                                <th class="py-3 px-4 font-bold">Produto em Comum</th>
+                                <th class="py-3 px-4 font-bold text-center">Preço Antigo</th>
+                                <th class="py-3 px-4 font-bold text-center">Preço Atual</th>
+                                <th class="py-3 px-4 font-bold text-right">Variação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="conteudoComparacao" class="divide-y divide-gray-100">
+                            <!-- Comparação dinâmica aqui -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="mensagemSemComparacao" class="hidden text-center py-8 text-gray-500">
+                    <i class="ph ph-warning-circle text-4xl mb-2 text-gray-300"></i>
+                    <p>Nenhum produto com preço preenchido coincide entre a lista antiga e a atual.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lógica JavaScript -->
+    <script>
+        const form = document.getElementById('itemForm');
+        const listaEl = document.getElementById('listaCompras');
+        const totalEl = document.getElementById('valorTotal');
+        const btnLimpar = document.getElementById('limparLista');
+        const csvInput = document.getElementById('csvFileInput');
+        const btnExportar = document.getElementById('btnExportar');
+        const btnFinalizar = document.getElementById('btnFinalizar');
+        
+        const modalHistorico = document.getElementById('modalHistorico');
+        const conteudoHistorico = document.getElementById('conteudoHistorico');
+        
+        const modalComparacao = document.getElementById('modalComparacao');
+        const conteudoComparacao = document.getElementById('conteudoComparacao');
+        const subtituloComparacao = document.getElementById('subtituloComparacao');
+        const mensagemSemComparacao = document.getElementById('mensagemSemComparacao');
+
+        let compras = JSON.parse(localStorage.getItem('minhaListaComprasDB')) || [];
+        let historicoDB = JSON.parse(localStorage.getItem('meuHistoricoDB')) || [];
+
+        const atualizarApp = () => {
+            localStorage.setItem('minhaListaComprasDB', JSON.stringify(compras));
+            renderizarLista();
+        };
+
+        const salvarHistorico = () => {
+            localStorage.setItem('meuHistoricoDB', JSON.stringify(historicoDB));
+        };
+
+        const formatarMoeda = (valor) => {
+            return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        };
+
+        const formatarData = (isoString) => {
+            const data = new Date(isoString);
+            return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        };
+
+        // --- SISTEMA DE COMPRAS ATUAL ---
+        window.atualizarPreco = (index, novoValorTexto) => {
+            const valorFormatado = novoValorTexto.replace(',', '.');
+            compras[index].valor = parseFloat(valorFormatado) || 0;
+            atualizarApp();
+        };
+
+        const renderizarLista = () => {
+            listaEl.innerHTML = '';
+            let totalGeral = 0;
+
+            if(compras.length === 0) {
+                listaEl.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-400">Sua lista atual está vazia.</td></tr>`;
+                totalEl.textContent = 'R$ 0,00';
+                return;
+            }
+
+            compras.forEach((item, index) => {
+                const subtotal = item.unidade * (item.valor || 0);
+                totalGeral += subtotal;
+
+                const classeInput = item.valor > 0 ? 'border-gray-300 bg-white' : 'border-amber-300 bg-amber-50 placeholder-amber-400';
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-blue-50/50 transition-colors group ";
+                tr.innerHTML = `
+                    <td class="py-1 px-1 lg:py-3 lg:px-4 text-gray-700 font-semibold">${item.unidade}x</td>
+                    <td class="py-1 px-1 lg:py-3 lg:px-4 text-gray-900 font-medium">${item.produto}</td>
+                    <td class="py-1 px-1 lg:py-3 lg:px-4">
+                        <div class="relative w-full max-w-[120px]">
+                            <span class="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-500 font-medium">R$</span>
+                            <input type="number" step="0.01" min="0" value="${item.valor > 0 ? item.valor : ''}" onchange="atualizarPreco(${index}, this.value)"
+                                class="w-full pl-8 pr-2 py-1.5 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none transition-colors text-gray-700 font-medium ${classeInput}" placeholder="0,00">
+                        </div>
+                    </td>
+                    <td class="py-1 px-1 lg:py-3 lg:px-4 text-blue-700 font-bold">${formatarMoeda(subtotal)}</td>
+                    <td class="py-1 px-1 lg:py-3 lg:px-4 text-center">
+                        <button onclick="removerItem(${index})" class="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50">
+                            <i class="ph ph-trash text-xl"></i>
+                        </button>
+                    </td>
+                `;
+                listaEl.appendChild(tr);
+            });
+            totalEl.textContent = formatarMoeda(totalGeral);
+        };
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const unidade = parseFloat(document.getElementById('unidade').value);
+            const produto = document.getElementById('produto').value.trim();
+            if (produto && unidade > 0) {
+                compras.push({ unidade, produto, valor: 0 });
+                atualizarApp();
+                form.reset();
+                document.getElementById('unidade').focus();
+            }
+        });
+
+        window.removerItem = (index) => {
+            compras.splice(index, 1);
+            atualizarApp();
+        };
+
+        btnLimpar.addEventListener('click', () => {
+            if (compras.length > 0 && confirm('Apagar todos os itens da lista atual?')) {
+                compras = [];
+                atualizarApp();
+            }
+        });
+
+        btnFinalizar.addEventListener('click', () => {
+            if(compras.length === 0) { alert('Sua lista está vazia!'); return; }
+            const temPreco = compras.some(item => item.valor > 0);
+            if(!temPreco) {
+                alert('Preencha o preço de pelo menos um produto para finalizar e salvar no histórico.');
+                return;
+            }
+
+            if(confirm('Deseja finalizar esta compra e arquivar a lista no histórico?')) {
+                const totalCalculado = compras.reduce((acc, item) => acc + (item.unidade * (item.valor || 0)), 0);
+                historicoDB.unshift({
+                    id: Date.now(),
+                    data: new Date().toISOString(),
+                    total: totalCalculado,
+                    itens: [...compras] 
+                });
+                salvarHistorico();
+                compras = []; 
+                atualizarApp();
+                alert('Compra registrada no histórico com sucesso!');
+            }
+        });
+
+        // --- EXIBIÇÃO DO HISTÓRICO ---
+        window.abrirHistorico = () => {
+            modalHistorico.classList.remove('hidden');
+            renderizarHistoricoUI();
+        };
+
+        window.fecharHistorico = () => {
+            modalHistorico.classList.add('hidden');
+        };
+
+        window.limparHistoricoTudo = () => {
+            if(historicoDB.length > 0 && confirm('Apagar TODO o histórico? Isso não pode ser desfeito.')) {
+                historicoDB = [];
+                salvarHistorico();
+                renderizarHistoricoUI();
+            }
+        };
+
+        window.reaproveitarLista = (id) => {
+            const compra = historicoDB.find(c => c.id === id);
+            if (compra) {
+                if (compras.length > 0 && !confirm('Sua lista atual já possui itens. Deseja ADICIONAR os produtos desta lista antiga à sua lista atual?')) return;
+                
+                const itensParaCopiar = compra.itens.map(item => ({ unidade: item.unidade, produto: item.produto, valor: 0 }));
+                compras = [...compras, ...itensParaCopiar];
+                atualizarApp();
+                fecharHistorico();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setTimeout(() => alert('Lista importada com sucesso! Os preços foram zerados para a nova compra.'), 300);
+            }
+        };
+
+        const renderizarHistoricoUI = () => {
+            conteudoHistorico.innerHTML = '';
+            if(historicoDB.length === 0) {
+                conteudoHistorico.innerHTML = `<div class="text-center py-10"><i class="ph ph-receipt text-6xl text-gray-300 mb-3"></i><p class="text-gray-500 font-medium">Nenhuma compra finalizada ainda.</p></div>`;
+                return;
+            }
+
+            historicoDB.forEach((compra) => {
+                const sanfona = document.createElement('details');
+                sanfona.className = "bg-white border border-gray-200 rounded-xl shadow-sm group";
+                
+                let tabelaItensHTML = '';
+                compra.itens.forEach(item => {
+                    tabelaItensHTML += `
+                        <tr class="border-b border-gray-100 last:border-0 text-sm">
+                            <td class="py-2 px-3 text-gray-600">${item.unidade}x</td>
+                            <td class="py-2 px-3 text-gray-800">${item.produto}</td>
+                            <td class="py-2 px-3 text-gray-500 text-right">${formatarMoeda(item.valor)}</td>
+                        </tr>
+                    `;
+                });
+
+                sanfona.innerHTML = `
+                    <summary class="cursor-pointer p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-gray-50 rounded-xl transition-colors list-none outline-none">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-100 text-blue-600 p-2 rounded-lg"><i class="ph ph-calendar-check text-xl"></i></div>
+                            <div>
+                                <span class="block text-gray-500 text-xs font-bold uppercase tracking-wider">Data da Compra</span>
+                                <span class="font-semibold text-gray-800">${formatarData(compra.data)}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between sm:justify-end gap-6 sm:w-1/3">
+                            <div class="text-right">
+                                <span class="block text-gray-500 text-xs font-bold uppercase tracking-wider">Total Pago</span>
+                                <span class="font-black text-green-600 text-lg">${formatarMoeda(compra.total)}</span>
+                            </div>
+                            <i class="ph ph-caret-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                        </div>
+                    </summary>
+                    <div class="p-5 border-t border-gray-100 bg-gray-50/50">
+                        <table class="w-full text-left bg-white border border-gray-200 rounded-lg overflow-hidden mb-4">
+                            <thead class="bg-gray-100 text-gray-500 text-xs uppercase">
+                                <tr>
+                                    <th class="py-2 px-3 w-16">Qtd</th>
+                                    <th class="py-2 px-3">Produto</th>
+                                    <th class="py-2 px-3 text-right w-32">Preço Un.</th>
+                                </tr>
+                            </thead>
+                            <tbody>${tabelaItensHTML}</tbody>
+                        </table>
+                        
+                        <div class="flex flex-wrap justify-end gap-3">
+                            <!-- NOVO BOTÃO DE COMPARAR -->
+                            <button onclick="compararLista(${compra.id})" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-lg shadow-sm flex items-center gap-2 font-medium transition-transform transform hover:scale-105 text-sm">
+                                <i class="ph ph-scales text-lg"></i> Comparar
+                            </button>
+                            <button onclick="reaproveitarLista(${compra.id})" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg shadow-sm flex items-center gap-2 font-medium transition-transform transform hover:scale-105 text-sm">
+                                <i class="ph ph-copy text-lg"></i> Copiar para Lista Atual
+                            </button>
+                        </div>
+                    </div>
+                `;
+                conteudoHistorico.appendChild(sanfona);
+            });
+        };
+
+        // --- SISTEMA DE COMPARAÇÃO (NOVO) ---
+        window.compararLista = (id) => {
+            if (compras.length === 0) {
+                alert('Sua lista atual está vazia. Adicione produtos para poder compará-los com o histórico.');
+                return;
+            }
+
+            const compraAntiga = historicoDB.find(c => c.id === id);
+            if (!compraAntiga) return;
+
+            subtituloComparacao.textContent = `Em relação à compra do dia ${formatarData(compraAntiga.data)}`;
+            conteudoComparacao.innerHTML = '';
+            let itensComparados = 0;
+
+            compras.forEach(itemAtual => {
+                // Procura um produto com o mesmo nome (ignorando maiúsculas/minúsculas)
+                const itemAntigo = compraAntiga.itens.find(i => i.produto.toLowerCase().trim() === itemAtual.produto.toLowerCase().trim());
+                
+                // Só compara se o produto existir na lista antiga e se já tivermos preenchido algum valor atual
+                if (itemAntigo && itemAntigo.valor > 0 && itemAtual.valor > 0) {
+                    itensComparados++;
+                    const diferenca = itemAtual.valor - itemAntigo.valor;
+                    
+                    let corTexto = "text-gray-500";
+                    let icone = `<i class="ph ph-equals"></i> Igual`;
+                    let valorDiferenca = "-";
+
+                    if (diferenca > 0) {
+                        corTexto = "text-red-500";
+                        icone = `<i class="ph ph-trend-up"></i> Aumentou`;
+                        valorDiferenca = `+ ${formatarMoeda(diferenca)}`;
+                    } else if (diferenca < 0) {
+                        corTexto = "text-green-500";
+                        icone = `<i class="ph ph-trend-down"></i> Baixou`;
+                        valorDiferenca = `- ${formatarMoeda(Math.abs(diferenca))}`;
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50 border-b border-gray-100";
+                    tr.innerHTML = `
+                        <td class="py-3 px-4 text-gray-800 font-medium">${itemAtual.produto}</td>
+                        <td class="py-3 px-4 text-center text-gray-500">${formatarMoeda(itemAntigo.valor)}</td>
+                        <td class="py-3 px-4 text-center font-semibold text-gray-800">${formatarMoeda(itemAtual.valor)}</td>
+                        <td class="py-3 px-4 text-right font-bold ${corTexto} flex flex-col items-end">
+                            <span>${valorDiferenca}</span>
+                            <span class="text-[10px] uppercase font-bold tracking-wider flex items-center gap-1 opacity-70">${icone}</span>
+                        </td>
+                    `;
+                    conteudoComparacao.appendChild(tr);
+                }
+            });
+
+            if (itensComparados === 0) {
+                mensagemSemComparacao.classList.remove('hidden');
+                conteudoComparacao.parentElement.classList.add('hidden');
+            } else {
+                mensagemSemComparacao.classList.add('hidden');
+                conteudoComparacao.parentElement.classList.remove('hidden');
+            }
+
+            modalComparacao.classList.remove('hidden');
+        };
+
+        window.fecharComparacao = () => {
+            modalComparacao.classList.add('hidden');
+        };
+
+        // --- IMPORTAR / EXPORTAR ---
+        csvInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evento) => {
+                processarCSV(evento.target.result);
+                csvInput.value = ''; 
+            };
+            reader.readAsText(file);
+        });
+
+        const processarCSV = (csvTexto) => {
+            const linhas = csvTexto.split('\n');
+            let importados = 0;
+            linhas.forEach((linha, index) => {
+                if (index === 0 && linha.toLowerCase().includes('produto')) return;
+                const colunas = linha.includes(';') ? linha.split(';') : linha.split(',');
+                if (colunas.length >= 2) {
+                    const unidade = parseFloat(colunas[0].trim());
+                    const produto = colunas[1].trim();
+                    let valor = 0;
+                    if(colunas[2]) {
+                        valor = parseFloat(colunas[2].trim().replace('R$', '').replace(',', '.')) || 0;
+                    }
+                    if (!isNaN(unidade) && produto) {
+                        compras.push({ unidade, produto, valor });
+                        importados++;
+                    }
+                }
+            });
+            if (importados > 0) {
+                atualizarApp();
+                alert(`${importados} itens importados!`);
+            }
+        };
+
+        btnExportar.addEventListener('click', () => {
+            if (compras.length === 0) { alert('A lista está vazia!'); return; }
+            let csvContent = "unidade,produto,valor\n";
+            compras.forEach(item => {
+                csvContent += `${item.unidade},${item.produto.replace(/,/g, '')},${(item.valor || 0).toFixed(2)}\n`;
+            });
+            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'lista_compras.csv';
+            link.click();
+        });
+
+        // Inicialização
+        renderizarLista();
+    </script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+    </style>
+</body>
+</html>
