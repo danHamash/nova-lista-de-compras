@@ -45,11 +45,9 @@
                             <i class="ph ph-upload-simple text-xl"></i> Importar CSV
                             <input type="file" id="csvFileInput" accept=".csv" class="hidden" />
                         </label>
-                        <!-- BOTÃO WHATSAPP (AGORA ENVIA O ARQUIVO CSV) -->
                         <button id="btnWhatsApp" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow transition-colors flex items-center justify-center gap-2 font-medium">
                             <i class="ph ph-whatsapp-logo text-xl"></i> Wpp (Planilha)
                         </button>
-                        <!-- BOTÃO EXPORTAR (DOWNLOAD PADRÃO) -->
                         <button id="btnExportar" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg shadow transition-colors flex items-center justify-center gap-2 font-medium">
                             <i class="ph ph-download-simple text-xl"></i> Baixar CSV
                         </button>
@@ -564,7 +562,7 @@
             if (importados > 0) { atualizarApp(); alert(`${importados} itens importados com sucesso!`); }
         };
 
-        // --- EXPORTAR WHATSAPP (AGORA ENVIA O ARQUIVO CSV NATIVAMENTE) ---
+        // --- EXPORTAR WHATSAPP (COMPARTILHAMENTO DE ARQUIVO) ---
         btnWhatsApp.addEventListener('click', async () => {
             if (compras.length === 0) { alert('A lista está vazia!'); return; }
             
@@ -579,7 +577,6 @@
             const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
             const fileName = 'lista_compras.csv';
 
-            // 1. Tenta acionar o compartilhamento nativo do iOS/Android para o WhatsApp
             if (navigator.canShare) {
                 const file = new File([blob], fileName, { type: 'text/csv' });
                 if (navigator.canShare({ files: [file] })) {
@@ -588,34 +585,26 @@
                             files: [file],
                             title: 'Lista de Compras'
                         });
-                        return; // Impede que a etapa de download do PC aconteça se o celular abriu a aba com sucesso
+                        return; 
                     } catch (error) {
-                        console.log('Compartilhamento cancelado pelo usuário ou indisponível.', error);
-                        // Apenas aborta a função sem forçar download se o usuário apertou em "Cancelar" na tela do iPhone
                         return; 
                     }
                 }
             }
             
-            // 2. Fallback para PC: Se não houver menu de compartilhar (ex: Windows/Mac)
-            alert('Seu aparelho não suporta o envio direto de arquivos para o WhatsApp. O arquivo da planilha será baixado e você poderá enviá-lo pelo WhatsApp Web.');
+            alert('Seu aparelho não suporta o menu de compartilhamento nativo. O arquivo da planilha será baixado e você poderá enviá-lo pelo WhatsApp Web.');
             
-            const url = window.URL.createObjectURL(blob);
+            // Usando URI de dados para download infalível (Chrome/PC)
+            const encodedUri = "data:text/csv;charset=utf-8," + encodeURIComponent("\uFEFF" + csvContent);
             const link = document.createElement('a');
-            link.href = url;
+            link.href = encodedUri;
             link.download = fileName;
-            link.style.display = 'none';
-            
             document.body.appendChild(link);
             link.click();
-            
-            setTimeout(() => {
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-            }, 300);
+            document.body.removeChild(link);
         });
 
-        // --- EXPORTAR ARQUIVO (DOWNLOAD CLÁSSICO PARA PC) ---
+        // --- EXPORTAR ARQUIVO (DOWNLOAD INFALÍVEL PARA QUALQUER NAVEGADOR) ---
         btnExportar.addEventListener('click', () => {
             try {
                 if (compras.length === 0) { alert('A lista está vazia!'); return; }
@@ -628,21 +617,16 @@
                     csvContent += `${item.unidade},${prod},${cat},${val}\n`;
                 });
                 
-                const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-                const url = window.URL.createObjectURL(blob);
-                
+                // Em vez de Blob URL, converte para Link de Dados Codificado (Funciona sempre no Chrome mobile/desktop)
+                const encodedUri = "data:text/csv;charset=utf-8," + encodeURIComponent("\uFEFF" + csvContent);
                 const link = document.createElement('a');
-                link.href = url;
-                link.download = 'minha_lista_compras.csv';
-                link.style.display = 'none';
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "minha_lista_compras.csv");
                 
                 document.body.appendChild(link);
                 link.click();
-                
-                setTimeout(() => {
-                    document.body.removeChild(link);
-                    window.URL.revokeObjectURL(url);
-                }, 300);
+                document.body.removeChild(link);
+
             } catch (err) {
                 alert("Ocorreu um erro ao exportar: " + err.message);
             }
